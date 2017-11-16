@@ -587,8 +587,8 @@ export default class Drawer extends Component {
         <BlurView
           viewRef={findNodeHandle(this.mainOverlay)}
           style={[styles.overlay, this.props.styles && this.props.styles.mainOverlay, {height: this.props.blurHeight, opacity: this.props.blurRatio}]}
-          blurType={'dark'}
-          blurAmount={10}
+          blurType={this.props.blurType}
+          blurAmount={this.props.blurAmount}
         />
       </View>
     )
