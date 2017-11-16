@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types';
-import { PanResponder, View, StyleSheet, Dimensions, InteractionManager, I18nManager } from 'react-native'
+import { PanResponder, View, StyleSheet, Dimensions, InteractionManager, I18nManager, findNodeHandle } from 'react-native'
+import { BlurView } from 'react-native-blur'
 
 import tween from './tweener'
 
@@ -8,6 +9,8 @@ let deviceScreen = Dimensions.get('window')
 const DOUBLE_TAP_INTERVAL = 500
 const TAP_DURATION = 250
 const propsWhomRequireUpdate = ['closedDrawerOffset', 'openDrawerOffset', 'type', 'styles']
+
+// Fork with Blur View
 
 export default class Drawer extends Component {
 
@@ -53,7 +56,6 @@ export default class Drawer extends Component {
     onCloseStart: PropTypes.func,
     onOpen: PropTypes.func,
     onOpenStart: PropTypes.func,
-    onDragStart: PropTypes.func,
     openDrawerOffset: PropTypes.oneOfType([PropTypes.number, PropTypes.func]),
     panThreshold: PropTypes.number,
     panCloseMask: PropTypes.number,
@@ -194,7 +196,7 @@ export default class Drawer extends Component {
         onMoveShouldSetPanResponderCapture: this.onMoveShouldSetPanResponderCapture,
         onPanResponderMove: this.onPanResponderMove,
         onPanResponderRelease: this.onPanResponderRelease,
-	onPanResponderTerminate: this.onPanResponderTerminate
+        onPanResponderTerminate: this.onPanResponderTerminate
       })
     }
 
@@ -283,9 +285,6 @@ export default class Drawer extends Component {
     this._length = length
 
     this.updatePosition()
-    if (!this._panning) {
-      this.props.onDragStart && this.props.onDragStart();
-    }
     this._panning = true
   };
 
@@ -564,7 +563,7 @@ export default class Drawer extends Component {
         key="drawerContainer"
         onLayout={this.handleSetViewport}
         style={this.stylesheet.container}
-        >
+      >
         {first}
         {second}
       </View>
@@ -578,13 +577,19 @@ export default class Drawer extends Component {
         key="main"
         ref={c => this.main = c}
         style={[this.stylesheet.main, {height: this.getMainHeight(), width: this.getMainWidth()}]}
-        >
+      >
         {this.props.children}
         <View
           pointerEvents={ this._open && this.shouldCaptureGestures() ? 'auto' : 'none' }
           ref={c => this.mainOverlay = c}
           style={[styles.overlay, this.props.styles && this.props.styles.mainOverlay]}
-          />
+        />
+        <BlurView
+          viewRef={findNodeHandle(this.mainOverlay)}
+          style={[styles.overlay, this.props.styles && this.props.styles.mainOverlay, {height: this.props.blurHeight, opacity: this.props.blurRatio}]}
+          blurType={'dark'}
+          blurAmount={10}
+        />
       </View>
     )
   }
@@ -597,13 +602,13 @@ export default class Drawer extends Component {
         ref={c => this.drawer = c}
         elevation={this.props.elevation}
         style={[this.stylesheet.drawer, {height: this.getDrawerHeight(), width: this.getDrawerWidth()}]}
-        >
+      >
         {this.props.content}
         <View
           pointerEvents={ !this._open && this.shouldCaptureGestures() ? 'auto' : 'none' }
           ref={c => this.drawerOverlay = c}
           style={[styles.overlay, this.props.styles && this.props.styles.drawerOverlay]}
-          />
+        />
       </View>
     )
   }

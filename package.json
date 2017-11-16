@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "tween-functions": "^1.0.1",
-    "prop-types": "^15.5.8"
+    "prop-types": "^15.5.8",
+    "react-native-blur": "3.2.2"
   },
   "devDependencies": {
     "babel-eslint": "^4.1.8",
