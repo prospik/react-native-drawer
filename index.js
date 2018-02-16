@@ -27,6 +27,9 @@ export default class Drawer extends Component {
   _syncAfterUpdate = false;
   _interactionHandle = null;
 
+  mainOverlay = null;
+  blurRef = null;
+
   static tweenPresets = {
     parallax: (ratio, side = 'left') => {
       let drawer = { [side] : -150 * (1 - ratio)}
@@ -127,6 +130,10 @@ export default class Drawer extends Component {
     this.initialize(this.props)
   }
 
+  componentDidMount() {
+      this.findOverlayRef();
+  }
+
   componentWillReceiveProps(nextProps) {
     if (this.requiresResync(nextProps)) this.resync(null, nextProps)
 
@@ -141,6 +148,13 @@ export default class Drawer extends Component {
       this._syncAfterUpdate = false
       this._open ? this.open('force') : this.close('force')
     }
+    this.findOverlayRef();
+  }
+
+  findOverlayRef = () => {
+      if (this.mainOverlay) {
+          this.blurRef = findNodeHandle(this.mainOverlay);
+      }
   }
 
   initialize = (props) => {
@@ -584,12 +598,14 @@ export default class Drawer extends Component {
           ref={c => this.mainOverlay = c}
           style={[styles.overlay, this.props.styles && this.props.styles.mainOverlay]}
         />
-        <BlurView
-          viewRef={findNodeHandle(this.mainOverlay)}
-          style={[styles.overlay, this.props.styles && this.props.styles.mainOverlay, {height: this.props.blurHeight, opacity: this.props.blurRatio}]}
-          blurType={this.props.blurType}
-          blurAmount={this.props.blurAmount}
-        />
+        {this.blurRef &&
+          <BlurView
+              viewRef={this.blurRef}
+              style={[styles.overlay, this.props.styles && this.props.styles.mainOverlay,
+                      {height: this.props.blurHeight, opacity: this.props.blurRatio}]}
+              blurType={this.props.blurType}
+              blurAmount={this.props.blurAmount}
+          />}
       </View>
     )
   }
